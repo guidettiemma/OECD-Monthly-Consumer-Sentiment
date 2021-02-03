@@ -1,0 +1,497 @@
+<doctype HTML>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<head>
+
+	<link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700,700i|Oswald:200,300,400,500,600,700&display=swap&subset=latin-ext" rel="stylesheet">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/site.css">
+<script src="https://code.jquery.com/jquery-3.5.0.js" integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc="
+	crossorigin="anonymous"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+	 
+<script src="libs/d3.v4.min.js"></script>
+	<script src="libs/d3.v4.jetpack.min.js"></script>
+	<script src="libs/d3-scale-chromatic.v1.min.js"></script>
+	<script src="libs/topojson.v1.min.js"></script>
+	<script src="libs/d3-queue.v3.min.js"></script>
+	<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js" integrity="sha512-wNH6xsp2n8CfB91nrBtfc4sfLwYPBMjSWVUwQOp60AYYXH6i8yCwuKFZ4rgK2i6pQek/b+bSyR7b01/922IBzQ==" crossorigin="anonymous"></script>
+	<link rel="icon" href="img/favicon.ico" >
+
+
+
+
+</head>
+
+<body>
+
+<h1>Title</h1>
+	<div id="slider">
+		  <button id="play-button">Play</button>
+	</div>
+
+	<div id="legend"></div>
+	<div id="aboutMap">
+	</div>
+
+	<!--<div id="source"><b>Source</b>: <a href="https://dx.doi.org/10.1787/67ede41b-en" target="_blank">OECD Pensions Outlook 2020</a></div>-->
+
+
+</body>
+<script type="text/javascript">
+
+
+	var worldData, alldata;
+	var long_data = []; 
+
+	var urls = {
+	    world: "data/world.json",
+	    country:"data/coord_country.tsv",
+		data: "data/data.tsv",
+		cci: "data/CCI.csv"
+	};
+
+	var divMap = d3.select("body").append("div") 
+	    .attr("class", "tooltip")       
+		.style("opacity", 0);
+
+    var format = d3.format(",.1f");
+    var margin = 20,centered;
+
+	var mapRatio=0.41;
+	var mapScale;
+    
+    var width = document.getElementById("aboutMap").offsetWidth,
+    	height= width*mapRatio;
+	
+	var formatDateIntoYear = d3.timeFormat("%Y");
+	var formatDate = d3.timeFormat("%b-%Y");
+	var formatInitDate = d3.timeFormat("%d-%m-%Y");
+	var parseDate = d3.timeParse("%d-%m-%Y");
+
+	//var colorScale = d3.scaleOrdinal(d3.schemeRdYlGn[9])
+	//  .domain([-2, 2]);
+	var colorScale = d3.scaleSequential(d3.interpolateBrBG)
+		//.range(["#C12B4F","#00765E"])
+
+	if(width>750)
+		mapScale= 6.7;
+	else
+		mapScale=6.3
+
+  	var projection = d3.geoRobinson()
+	    		.scale(width/mapScale)
+	    		.translate([width / 2, 5.7*height / 10])
+  	        	.precision(.01);
+
+  	var path = d3.geoPath()
+                     .projection(projection);
+
+  	var svg = d3.select("#aboutMap").append("svg")
+  	    .attr("width", width)
+  	    .attr("height", height)
+ 
+	var worldMap=svg.append("g")
+
+	
+
+	var heightSlider= 100;
+    var slider=d3.select("#slider").append("svg")
+  	    .attr("width", width)
+		  .attr("height", heightSlider).append("g").attr("class", "slider")
+    	.attr("transform", "translate(" + margin + "," + heightSlider/2 + ")");
+
+	var handle;
+	var label;		  
+	var moving = false;
+	var currentValue = 0;
+	var targetValue = width;
+	var playButton = d3.select("#play-button");
+	var x;
+
+	var heightLegend= 100;
+	var legend = d3.select("#legend").append("svg").attr("id","legendSVG")
+	.attr("width", width/2)
+	.attr("height", heightLegend)
+
+	var voronoiLayer = svg.append("g");
+
+	var voronoi = d3.voronoi()
+		.x(function (d) { return projection([d.lng, d.lat])[0]; })
+		.y(function (d) { return projection([d.lng, d.lat])[1]; })
+		.extent([[-1, -1], [width + 1, height + 1]]);
+	
+	var polygons;
+	var polygonData;
+
+	d3.queue()
+	    .defer(d3.json, urls.world)
+	    .defer(d3.tsv, urls.country)
+		.defer(d3.csv, urls.cci)
+	    .await(render);
+
+
+
+
+	function render(err,world,country,consumer){
+
+		worldData=world;
+
+		var counter=0; 
+
+		consumer.forEach( function(row) {
+			// Loop through all of the columns, and for each column
+			// make a new row
+			Object.keys(row).forEach( function(colname) {
+			// Ignore 'State' and 'Value' columns
+				if(colname == "ISO" || colname == "Country") {
+					return
+				}
+				var lat,lng;
+				country.forEach(function(k){
+					if(row["ISO"]==k.ISO3){
+						lat=k.lat;lng=k.lng;
+					}
+				})
+				if(row["ISO"]!="OTO")
+					long_data.push({"ISO": row["ISO"], "Country": row["Country"],"lat":lat,"lng":lng,"date": colname, "value": row[colname]});
+			});
+
+			counter++;
+			if(counter==consumer.length){
+				renderFilter();
+				renderMap()
+			}
+		}); 
+
+	};	  
+    
+	function renderFilter(){
+
+		var startDate = d3.min(long_data,function(d){return parseDate(d.date)});
+		var endDate = d3.max(long_data,function(d){return parseDate(d.date)});
+
+		var lowest = d3.min(long_data,function(d){return parseFloat(d.value)});
+		var highest = d3.max(long_data,function(d){return parseFloat(d.value)});
+		colorScale.domain([lowest, highest]);		
+
+		//// DRAW LEGEND
+
+		legend.append("g")
+		.attr("class", "legendOrdinal")
+		.attr("transform", "translate(20,20)");
+
+		var legendOrdinal = d3.legendColor()
+			.shapeWidth(width/20)
+			.cells(9) 
+			.orient("horizontal")
+			.scale(colorScale) 
+
+		legend.select(".legendOrdinal")
+		.call(legendOrdinal);
+				
+        
+		////////// slider //////////
+
+		 moving = false;
+		 currentValue = 3*margin;
+		 targetValue = width-4*margin;
+
+		 playButton = d3.select("#play-button");
+			
+		x = d3.scaleTime()
+			.domain([startDate, endDate])
+			.range([margin, targetValue])
+			.clamp(true);
+
+		/*	slider.attr("class", "slider")
+	    	.attr("id","slider")
+			.attr("transform", "translate(" + margin+ "," + heightSlider + ")");*/
+
+		slider.append("line")
+			.attr("class", "track")
+			.attr("x1", x.range()[0])
+			.attr("x2", x.range()[1])
+		.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+			.attr("class", "track-inset")
+		.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+			.attr("class", "track-overlay")
+			.call(d3.drag()
+				.on("start.interrupt", function() { slider.interrupt(); })
+				.on("start drag", function() {
+				currentValue = d3.event.x;
+				updateMap(x.invert(currentValue)); 
+				})
+			);
+
+		slider.insert("g", ".track-overlay")
+			.attr("class", "ticks")
+			.attr("transform", "translate(0," + 18 + ")")
+		.selectAll("text")
+			.data(x.ticks(10))
+			.enter()
+			.append("text")
+			.attr("x", x)
+			.attr("y", 10)
+			.attr("text-anchor", "middle")
+			.text(function(d) { return formatDate(d); }); // could move to formatDateIntoYear(d) once the period covered as extended. 
+
+		 handle = slider.insert("circle", ".track-overlay")
+			.attr("class", "handle")
+			.attr("r", 9);
+
+		 label = slider.append("text")  
+			.attr("class", "label")
+			.attr("text-anchor", "middle")
+			.text(formatDate(startDate))
+			.attr("transform", "translate(0," + (-25) + ")")
+
+}
+ 
+	function renderMap(){
+		
+	    worldMap
+	    	.attr("id","world")
+	    	.selectAll("path")
+	        .data(worldData.features)
+	      	.enter().append("path")
+			.attr("class", function (k) {
+				return "world ";
+			})
+			.attr("id", function (k) {
+				return k.id;
+			})
+			.attr('fill', function(d){
+				var value= "#c0c7c9";
+				return value;
+			})
+			.attr("stroke-width","1px")
+			.attr('stroke', function(d){
+				var value= "#c0c7c9";
+				return value;
+			})
+			.attr("d", path)
+			
+			
+		var startDate = d3.min(long_data,function(d){return parseDate(d.date)});
+
+		polygonData=long_data
+		polygons = voronoi(polygonData.filter(function(k){ return formatDate(parseDate(k.date))==formatDate(startDate)})).polygons();
+		voronoiLayer.selectAll(".cell")
+			.data(polygons)
+			.enter()
+			.append("path")
+			.attr("class", "cell")
+			.attr("fill", "none")
+			.style("pointer-events", "all")
+			.attr("stroke", "none")
+			.attr("d", function (d) { return "M" + d.join("L") + "Z"; })
+			.on('mouseover', function (d) {
+					d3.select("#" + d.data.ISO).style("opacity",0.5)
+					divMap.transition()
+						.duration(250)
+						.style("opacity", 1);
+					
+					var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+d.data.date+"</i><br/>"+d.data.value;
+					divMap.html(htmlText)
+						.style("left", event.pageX - document.body.scrollLeft + "px")
+						.style("top", event.pageY  + "px");
+						
+				
+
+			})
+			
+			.on("mousemove", function (d) {
+
+				divMap
+					.style("left", event.pageX - document.body.scrollLeft + 10 + "px")
+					.style("top", event.pageY + "px");
+
+			})
+			.on('mouseout', function (d) {
+				
+				d3.select("#" + d.data.ISO).style("opacity",1)
+				
+				divMap.transition()
+					.duration(100)
+					.style("opacity", 0);
+			})
+						updateMap(startDate)
+
+	}
+
+	function updateMap(value){
+
+		// update position and text of label according to slider scale
+		handle.attr("cx", x(value));
+		label
+			.attr("x", x(value))
+			.text(formatDate(value));
+
+		// update map 	
+		worldMap
+			.selectAll("path")
+			.data(worldData.features)
+			.transition().duration(200)
+			.attr("class", function (k) {
+				return "world ";
+			})
+			.attr("id", function (k) {
+				return k.id;
+			})
+			.attr("stroke-width","1px")
+				.attr('stroke', function(d){
+					var basecolor = "#c0c7c9";
+					long_data.forEach(function(k){
+						if(k.ISO== d.id && formatDate(parseDate(k.date))==formatDate(value)){
+							basecolor =colorScale(parseFloat(k.value))
+							
+						}
+					})
+				return basecolor;
+				})
+			.attr('fill', function (d) {
+				
+				var basecolor = "#c0c7c9";
+				long_data.forEach(function(k){
+						if(k.ISO== d.id && formatDate(parseDate(k.date))==formatDate(value)){
+							basecolor =colorScale(parseFloat(k.value))
+							
+						}
+					})
+				return basecolor;
+			})
+
+		polygons = voronoi(polygonData.filter(function(k){ return formatDate(parseDate(k.date))==formatDate(value)})).polygons();
+		//polygons = voronoi(polygonData.filter(function(d){ return (d.date)=="01-06-2020"})).polygons();
+	
+		voronoiLayer.selectAll(".cell")
+			.data(polygons)
+			.attr("fill", "none")
+			.style("pointer-events", "all")
+			.attr("stroke", "none")
+			.attr("d", function (d) { return "M" + d.join("L") + "Z"; })
+
+		voronoiLayer.selectAll(".cell")
+				.on('mouseover', function (d) {
+						d3.select("#" + d.data.ISO).style("opacity",0.5)
+						divMap.transition()
+							.duration(250)
+							.style("opacity", 1);
+						
+						var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+d.data.date+"</i><br/>"+d.data.value;
+					divMap.html(htmlText)
+							.style("left", event.pageX - document.body.scrollLeft + "px")
+							.style("top", event.pageY /*- document.body.scrollTop*/ + "px");
+							
+					
+
+					})
+				
+				.on("mousemove", function (d) {
+
+					divMap
+						.style("left", event.pageX - document.body.scrollLeft + 10 + "px")
+						.style("top", event.pageY + "px");
+
+				})
+				.on('mouseout', function (d) {
+					
+					d3.select("#" + d.data.ISO).style("opacity",1)
+					
+					divMap.transition()
+						.duration(100)
+						.style("opacity", 0);
+				})
+		
+}
+
+
+
+
+
+function resize() {
+		// adjust things when the window size changes
+		width = document.getElementById("aboutMap").offsetWidth,
+			height = width * mapRatio;
+
+		if (width > 750)
+			mapScale = 6.7;
+		else
+			mapScale = 6.3
+		// update projection
+		projection
+			.translate([width / 2, 6 * height / 10])
+			.scale(width / mapScale);
+
+		// resize the map container
+		svg.attr('width', width + 'px')
+			.attr('height', height + 'px');
+
+		// resize the map
+		worldMap.selectAll('.world').attr('d', path);
+		//world.selectAll('.state').attr('d', path);
+
+
+
+		voronoi
+			.extent([[-1, -1], [width + 1, height + 1]]);
+
+		polygons = voronoi(polygonData).polygons();
+
+		voronoiLayer.selectAll(".cell")
+			.data(polygons)
+			.attr("fill", "none")
+			.style("pointer-events", "all")
+			.attr("stroke", "none")
+			.attr("d", function (d) { return "M" + d.join("L") + "Z"; })
+	}
+
+
+d3.select(window).on('resize', resize);
+
+playButton
+    .on("click", function() {
+    var button = d3.select(this);
+    if (button.text() == "Pause") {
+      moving = false;
+      clearInterval(timer);
+      // timer = 0;
+      button.text("Play");
+    } else {
+      moving = true;
+      timer = setInterval(step, 100);
+      button.text("Pause");
+    }
+    console.log("Slider moving: " + moving);
+  })
+
+
+  
+function step() {
+  updateMap(x.invert(currentValue));
+  currentValue = currentValue + (targetValue/151);
+  if (currentValue > targetValue) {
+    moving = false;
+    currentValue = 0;
+    clearInterval(timer);
+    // timer = 0;
+    playButton.text("Play");
+    console.log("Slider moving: " + moving);
+  }
+}	
+
+
+
+d3.selectAll(".button.grey")
+	.on("click", function () {
+		d3.selectAll(".button.grey")
+			.style("background-color", "#ffffff").style("color","#0b1e2d")
+		d3.select(this)
+			.style("background-color", "#04629a").style("color", "#ffffff")
+	})
+
+</script>
+
