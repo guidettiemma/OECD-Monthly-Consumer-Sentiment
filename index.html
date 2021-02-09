@@ -75,8 +75,8 @@
 
 	//var colorScale = d3.scaleOrdinal(d3.schemeRdYlGn[9])
 	//  .domain([-2, 2]);
-	var colorScale = d3.scaleSequential(d3.interpolateRdYlBu)
-		//.range(["#C12B4F","#00765E"])
+	var colorScale =d3.scaleSequential(d3.interpolateRdYlBu)
+		//.range(["rgb(165, 0, 38)","rgb(248, 141, 82)","rgb(250, 248, 193)","rgb(188, 225, 237)","rgb(144, 194, 221)","rgb(49, 54, 149)"])
 
 	if(width>750)
 		mapScale= 6.7;
@@ -177,6 +177,7 @@
 
 		var lowest = d3.min(long_data,function(d){return parseFloat(d.value)});
 		var highest = d3.max(long_data,function(d){return parseFloat(d.value)});
+		
 		colorScale.domain([lowest, highest]);		
 
 		//// DRAW LEGEND
@@ -187,7 +188,7 @@
 
 		var legendOrdinal = d3.legendColor()
 			.shapeWidth(width/20)
-			.cells(5) 
+			//.cells(7) 
 			.orient("horizontal")
 			.scale(colorScale) 
 
