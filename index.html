@@ -27,7 +27,7 @@
 
 <body>
 
-	<h1>OECD normalised Consumer Confidence Barometer</h1>
+	<h1>OECD Consumer Confidence Barometer</h1>
 	<div id="introPara">Monthly growth rate of normalised consumer confidence for OECD countries & BRIICS. The indicators have been computed by normalising the consumer indicators (net balances, seasonally adjusted) to their mean and standard deviation. More detail on the methodology can be found <a href="" target="_blank">here</a>.</div>
 	<div id="slider">
 		  <button id="play-button">Play</button>
@@ -36,7 +36,7 @@
 	<div id="legend"></div>
 	<div id="aboutMap">
 	</div>
-	<div id="source">Source:</div>
+	<div id="source">Source: OECD MEI</div>
 
 	<!--<div id="source"><b>Source</b>: <a href="https://dx.doi.org/10.1787/67ede41b-en" target="_blank">OECD Pensions Outlook 2020</a></div>-->
 
@@ -189,7 +189,7 @@
 
 		var legendOrdinal = d3.legendColor()
 			.shapeWidth(width/20)
-			//.cells(7) 
+			.cells(6) 
 			.orient("horizontal")
 			.scale(colorScale) 
 
@@ -293,8 +293,9 @@
 			.attr("stroke", "none")
 			.attr("d", function (d) { return "M" + d.join("L") + "Z"; })
 			.on('mouseover', function (d) {
-					d3.select("#" + d.data.ISO).style("opacity",0.5)
-					d3.select("#" + d.data.ISO).style("stroke","#22222B")
+					d3.select("#" + d.data.ISO).style("opacity",0.3)
+					d3.select("#" + d.data.ISO).style("stroke","#171717")
+					d3.select("#" + d.data.ISO).style("stroke-width","2px")
 					divMap.transition()
 						.duration(250)
 						.style("opacity", 1);
@@ -391,7 +392,8 @@
 		voronoiLayer.selectAll(".cell")
 				.on('mouseover', function (d) {
 					d3.select("#" + d.data.ISO).style("opacity",0.5)
-					d3.select("#" + d.data.ISO).style("stroke","#22222B")
+					d3.select("#" + d.data.ISO).style("stroke","#171717")
+					d3.select("#" + d.data.ISO).style("stroke-width","2px")
 						divMap.transition()
 							.duration(250)
 							.style("opacity", 1);
