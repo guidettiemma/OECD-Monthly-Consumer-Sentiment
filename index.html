@@ -11,7 +11,7 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 	 
-<script src="libs/d3.v4.min.js"></script>
+<script src="libs/d3.v4.min.js"></script><script src="https://d3js.org/d3-dsv.v1.min.js"></script>
 	<script src="libs/d3.v4.jetpack.min.js"></script>
 	<script src="libs/d3-scale-chromatic.v1.min.js"></script>
 	<script src="libs/topojson.v1.min.js"></script>
@@ -45,13 +45,19 @@
 <script type="text/javascript">
 
 
+        function dateParser(d){
+            var splitted = d.split('M');
+            
+            return d3.timeParse('%m-%Y')(splitted[1] + '-' + splitted[0]);
+        }
+
 	var worldData, alldata;
 	var long_data = []; 
 
 	var urls = {
 	    world: "data/world.json",
 	    country:"data/coord_country.tsv",
-		data: "data/data.tsv",
+		data: "data/CSBarometer.txt",
 		cci: "data/CCI.csv"
 	};
 
@@ -76,7 +82,7 @@
 	//var colorScale = d3.scaleOrdinal(d3.schemeRdYlGn[9])
 	//  .domain([-2, 2]);
 
-	var colorScale =d3.scaleSequential(d3.interpolateRdYlBu)
+	var colorScale =d3.scaleSequential(d3.interpolateRdYlGn)
 	//.range(["rgb(165, 0, 38)","rgb(248, 141, 82)","rgb(250, 248, 193)","rgb(188, 225, 237)","rgb(144, 194, 221)","rgb(49, 54, 149)"])
 
 	if(width>750)
@@ -128,22 +134,45 @@
 	
 	var polygons;
 	var polygonData;
+	
+	const psv = d3.dsvFormat('|');
 
 	d3.queue()
 	    .defer(d3.json, urls.world)
 	    .defer(d3.tsv, urls.country)
 		.defer(d3.csv, urls.cci)
+		.defer(d3.text, urls.data)
 	    .await(render);
 
 
 
 
-	function render(err,world,country,consumer){
+	function render(err,world,country,consumer,data){
 
 		worldData=world;
-
 		var counter=0; 
 
+		psv.parse(data).forEach( function(row){
+
+
+				var lat,lng,Cou;
+				country.forEach(function(k){
+					if(row["ISO"]==k.ISO3){
+						lat=k.lat;lng=k.lng;Cou=k.Country
+					}
+				})
+  
+				if(row["ISO"]!="OTO" || row["ISO"]!="OXE" || row["ISO"]!="ONM" ||row["ISO"]!="A5M")
+					long_data.push({"ISO": row["ISO"], "Country": Cou,"lat":lat,"lng":lng,"date": dateParser(row["Time"]), "value": row["Value"]});
+			
+				counter++;
+
+				if(counter==psv.parse(data).length){
+					renderFilter();
+					renderMap()
+				}
+
+		});/*
 		consumer.forEach( function(row) {
 			// Loop through all of the columns, and for each column
 			// make a new row
@@ -159,7 +188,7 @@
 					}
 				})
 				if(row["ISO"]!="OTO")
-					long_data.push({"ISO": row["ISO"], "Country": row["Country"],"lat":lat,"lng":lng,"date": colname, "value": row[colname]});
+					long_data.push({"ISO": row["ISO"], "Country": row["Country"],"lat":lat,"lng":lng,"date": parseDate(colname), "value": row[colname]});
 			});
 
 			counter++;
@@ -167,14 +196,13 @@
 				renderFilter();
 				renderMap()
 			}
-		}); 
+		}); */
 
 	};	  
     
 	function renderFilter(){
-
-		var startDate = d3.min(long_data,function(d){return parseDate(d.date)});
-		var endDate = d3.max(long_data,function(d){return parseDate(d.date)});
+		var startDate = d3.min(long_data,function(d){return (d.date)});
+		var endDate = d3.max(long_data,function(d){return (d.date)});
 
 		var lowest = d3.min(long_data,function(d){return parseFloat(d.value)});
 		var highest = d3.max(long_data,function(d){return parseFloat(d.value)});
@@ -255,8 +283,7 @@
 }
  
 	function renderMap(){
-		
-	    worldMap
+		worldMap
 	    	.attr("id","world")
 	    	.selectAll("path")
 	        .data(worldData.features)
@@ -279,10 +306,10 @@
 			.attr("d", path)
 			
 			
-		var startDate = d3.min(long_data,function(d){return parseDate(d.date)});
+		var startDate = d3.min(long_data,function(d){return (d.date)});
 
 		polygonData=long_data
-		polygons = voronoi(polygonData.filter(function(k){ return formatDate(parseDate(k.date))==formatDate(startDate)})).polygons();
+		polygons = voronoi(polygonData.filter(function(k){ return formatDate((k.date))==formatDate(startDate)})).polygons();
 		voronoiLayer.selectAll(".cell")
 			.data(polygons)
 			.enter()
@@ -292,7 +319,7 @@
 			.style("pointer-events", "all")
 			.attr("stroke", "none")
 			.attr("d", function (d) { return "M" + d.join("L") + "Z"; })
-			.on('mouseover', function (d) {
+			.on('mouseover', function (d) {console.log(d.data); 
 					d3.select("#" + d.data.ISO).style("opacity",0.3)
 					d3.select("#" + d.data.ISO).style("stroke","#171717")
 					d3.select("#" + d.data.ISO).style("stroke-width","2px")
@@ -355,12 +382,14 @@
 				return k.id;
 			})
 			
-				.style('stroke', function(d){
+			.style('stroke', function(d){
 					var basecolor = "#c0c7c9";
 					long_data.forEach(function(k){
-						if(k.ISO== d.id && formatDate(parseDate(k.date))==formatDate(value)){
+						if(k.ISO== d.id && formatDate((k.date))==formatDate(value)){
 							if(k.value!="")
 								basecolor =colorScale(parseFloat(k.value))
+							if(k.value=="") 
+								basecolor ="#868b8c";
 							
 						}
 					})
@@ -370,16 +399,17 @@
 				
 				var basecolor = "#c0c7c9";
 				long_data.forEach(function(k){
-						if(k.ISO== d.id && formatDate(parseDate(k.date))==formatDate(value)){
+						if(k.ISO== d.id && formatDate((k.date))==formatDate(value)){
 							if(k.value!="")
 								basecolor =colorScale(parseFloat(k.value))
-							
+							if(k.value=="") 
+							basecolor ="#868b8c";
 						}
 					})
 				return basecolor;
 			})
 
-		polygons = voronoi(polygonData.filter(function(k){ return formatDate(parseDate(k.date))==formatDate(value)})).polygons();
+		polygons = voronoi(polygonData.filter(function(k){ return formatDate((k.date))==formatDate(value)})).polygons();
 		//polygons = voronoi(polygonData.filter(function(d){ return (d.date)=="01-06-2020"})).polygons();
 	
 		voronoiLayer.selectAll(".cell")
@@ -390,7 +420,7 @@
 			.attr("d", function (d) { return "M" + d.join("L") + "Z"; })
 
 		voronoiLayer.selectAll(".cell")
-				.on('mouseover', function (d) {
+				.on('mouseover', function (d) {console.log(d.data);
 					d3.select("#" + d.data.ISO).style("opacity",0.5)
 					d3.select("#" + d.data.ISO).style("stroke","#171717")
 					d3.select("#" + d.data.ISO).style("stroke-width","2px")
@@ -473,7 +503,7 @@ function resize() {
 	}
 
 
-d3.select(window).on('resize', resize);
+//d3.select(window).on('resize', resize);
 
 playButton
     .on("click", function() {
@@ -488,9 +518,8 @@ playButton
       timer = setInterval(step, 33);
       button.text("Pause");
     }
-    console.log("Slider moving: " + moving);
+	
   })
-
 
   
 function step() {
@@ -502,7 +531,7 @@ function step() {
     clearInterval(timer);
     // timer = 0;
     playButton.text("Play");
-    console.log("Slider moving: " + moving);
+	
   }
 }	
 
