@@ -27,8 +27,8 @@
 
 <body>
 
-	<h1>OECD Consumer Confidence Barometer</h1>
-	<div id="introPara">Monthly growth rate of normalised consumer confidence for OECD countries & BRIICS. The indicators have been computed by normalising the consumer indicators (net balances, seasonally adjusted) to their mean and standard deviation. More detail on the methodology can be found <a href="" target="_blank">here</a>.</div>
+	<h1>OECD Consumer Barometer</h1>
+	<!--<div id="introPara">Monthly growth rate of normalised consumer confidence for OECD countries & BRIICS. The indicators have been computed by normalising the consumer indicators (net balances, seasonally adjusted) to their mean and standard deviation. More detail on the methodology can be found <a href="" target="_blank">here</a>.</div>-->
 	<div id="slider">
 		  <button id="play-button">Play</button>
 	</div>
@@ -57,8 +57,7 @@
 	var urls = {
 	    world: "data/world.json",
 	    country:"data/coord_country.tsv",
-		data: "data/CSBarometer.txt",
-		cci: "data/CCI.csv"
+		data: "data/CSBarometer.txt"
 	};
 
 	var divMap = d3.select("body").append("div") 
@@ -140,14 +139,13 @@
 	d3.queue()
 	    .defer(d3.json, urls.world)
 	    .defer(d3.tsv, urls.country)
-		.defer(d3.csv, urls.cci)
 		.defer(d3.text, urls.data)
 	    .await(render);
 
 
 
 
-	function render(err,world,country,consumer,data){
+	function render(err,world,country,data){
 
 		worldData=world;
 		var counter=0; 
@@ -172,31 +170,7 @@
 					renderMap()
 				}
 
-		});/*
-		consumer.forEach( function(row) {
-			// Loop through all of the columns, and for each column
-			// make a new row
-			Object.keys(row).forEach( function(colname) {
-			// Ignore 'State' and 'Value' columns
-				if(colname == "ISO" || colname == "Country") {
-					return
-				}
-				var lat,lng;
-				country.forEach(function(k){
-					if(row["ISO"]==k.ISO3){
-						lat=k.lat;lng=k.lng;
-					}
-				})
-				if(row["ISO"]!="OTO")
-					long_data.push({"ISO": row["ISO"], "Country": row["Country"],"lat":lat,"lng":lng,"date": parseDate(colname), "value": row[colname]});
-			});
-
-			counter++;
-			if(counter==consumer.length){
-				renderFilter();
-				renderMap()
-			}
-		}); */
+		});
 
 	};	  
     
@@ -319,7 +293,7 @@
 			.style("pointer-events", "all")
 			.attr("stroke", "none")
 			.attr("d", function (d) { return "M" + d.join("L") + "Z"; })
-			.on('mouseover', function (d) {console.log(d.data); 
+			.on('mouseover', function (d) {
 					d3.select("#" + d.data.ISO).style("opacity",0.3)
 					d3.select("#" + d.data.ISO).style("stroke","#171717")
 					d3.select("#" + d.data.ISO).style("stroke-width","2px")
@@ -327,21 +301,16 @@
 						.duration(250)
 						.style("opacity", 1);
 					
-					var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+d.data.date+"</i><br/>Normalised consumer confidence indicator: <b>"+d.data.value+"</b>";
+					var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+formatDate(d.data.date)+"</i><br/>Normalised consumer confidence indicator: <b>"+d.data.value+"</b>";
 					divMap.html(htmlText)
 						.style("left", event.pageX - document.body.scrollLeft + "px")
 						.style("top", event.pageY  + "px");
-						
-				
-
 			})
-			
 			.on("mousemove", function (d) {
 
 				divMap
 					.style("left", event.pageX - document.body.scrollLeft + 10 + "px")
 					.style("top", event.pageY + "px");
-
 			})
 			.on('mouseout', function (d) {
 				
@@ -349,8 +318,9 @@
 					var basecolor="#c0c7c9";
 						if(d.data.value!="")
 							basecolor = colorScale(parseFloat(d.data.value))
-						 
-							return basecolor;
+						if(d.data.value=="") 
+							basecolor ="#868b8c";
+						return basecolor;
 					})
 				d3.select("#" + d.data.ISO).style("opacity",1)
 				
@@ -358,7 +328,7 @@
 					.duration(100)
 					.style("opacity", 0);
 			})
-						updateMap(startDate)
+			updateMap(startDate)
 
 	}
 
@@ -386,9 +356,9 @@
 					var basecolor = "#c0c7c9";
 					long_data.forEach(function(k){
 						if(k.ISO== d.id && formatDate((k.date))==formatDate(value)){
-							if(k.value!="")
+							if(d.value!="")
 								basecolor =colorScale(parseFloat(k.value))
-							if(k.value=="") 
+							if(d.value=="") 
 								basecolor ="#868b8c";
 							
 						}
@@ -400,27 +370,31 @@
 				var basecolor = "#c0c7c9";
 				long_data.forEach(function(k){
 						if(k.ISO== d.id && formatDate((k.date))==formatDate(value)){
-							if(k.value!="")
+							if(d.value!="")
 								basecolor =colorScale(parseFloat(k.value))
-							if(k.value=="") 
-							basecolor ="#868b8c";
+							if(d.value=="") 
+								basecolor ="#868b8c";
 						}
 					})
 				return basecolor;
 			})
-
-		polygons = voronoi(polygonData.filter(function(k){ return formatDate((k.date))==formatDate(value)})).polygons();
-		//polygons = voronoi(polygonData.filter(function(d){ return (d.date)=="01-06-2020"})).polygons();
+			
+	polygons = voronoi(polygonData.filter(function(k){ return formatDate((k.date))==formatDate(value)})).polygons();
 	
-		voronoiLayer.selectAll(".cell")
+	voronoiLayer.selectAll(".cell").remove()
+
+	voronoiLayer.selectAll(".cell")
 			.data(polygons)
+			.enter()
+			.append("path")
+			.attr("class", "cell")
 			.attr("fill", "none")
 			.style("pointer-events", "all")
 			.attr("stroke", "none")
 			.attr("d", function (d) { return "M" + d.join("L") + "Z"; })
 
 		voronoiLayer.selectAll(".cell")
-				.on('mouseover', function (d) {console.log(d.data);
+				.on('mouseover', function (d) {
 					d3.select("#" + d.data.ISO).style("opacity",0.5)
 					d3.select("#" + d.data.ISO).style("stroke","#171717")
 					d3.select("#" + d.data.ISO).style("stroke-width","2px")
@@ -428,7 +402,7 @@
 							.duration(250)
 							.style("opacity", 1);
 						
-						var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+d.data.date+"</i><br/>Normalised consumer confidence indicator: <b>"+d.data.value+"</b>";
+						var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+formatDate(d.data.date)+"</i><br/>Normalised consumer confidence indicator: <b>"+d.data.value+"</b>";
 					divMap.html(htmlText)
 							.style("left", event.pageX - document.body.scrollLeft + "px")
 							.style("top", event.pageY /*- document.body.scrollTop*/ + "px");
@@ -449,8 +423,9 @@
 					var basecolor="#c0c7c9";
 						if(d.data.value!="")
 							basecolor = colorScale(parseFloat(d.data.value))
-						 
-							return basecolor;
+						if(d.data.value=="") 
+							basecolor ="#868b8c";
+						return basecolor;
 					})
 					d3.select("#" + d.data.ISO).style("opacity",1)
 					
@@ -515,7 +490,7 @@ playButton
       button.text("Play");
     } else {
       moving = true;
-      timer = setInterval(step, 33);
+      timer = setInterval(step, 0.01);
       button.text("Pause");
     }
 	
@@ -524,7 +499,7 @@ playButton
   
 function step() {
   updateMap(x.invert(currentValue));
-  currentValue = currentValue + (targetValue/151);
+  currentValue = currentValue + (1);
   if (currentValue > targetValue) {
     moving = false;
     currentValue = 0;
