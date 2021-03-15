@@ -57,7 +57,8 @@
 	var urls = {
 	    world: "data/world.json",
 	    country:"data/coord_country.tsv",
-		data: "data/CSBarometer.txt"
+		data: "data/CSBarometer.txt",
+		couList:"data/country-display.tsv"
 	};
 
 	var divMap = d3.select("body").append("div") 
@@ -140,37 +141,58 @@
 	    .defer(d3.json, urls.world)
 	    .defer(d3.tsv, urls.country)
 		.defer(d3.text, urls.data)
+		.defer(d3.tsv, urls.couList)
 	    .await(render);
 
 
 
 
-	function render(err,world,country,data){
+	function render(err,world,country,data,couList){
 
-		worldData=world;
-		var counter=0; 
+		var counterCou=0;
+		
+		world.features.forEach(function(d){
+			var display2push="No";
+			couList.forEach(function(k){
+					if(d.id==k.Country)
+						display2push=k.display
+			})
+			d.properties.display= display2push;
 
-		psv.parse(data).forEach( function(row){
+			counterCou++;
 
-
-				var lat,lng,Cou;
-				country.forEach(function(k){
-					if(row["ISO"]==k.ISO3){
-						lat=k.lat;lng=k.lng;Cou=k.Country
-					}
-				})
-  
-				if(row["ISO"]!="OTO" || row["ISO"]!="OXE" || row["ISO"]!="ONM" ||row["ISO"]!="A5M")
-					long_data.push({"ISO": row["ISO"], "Country": Cou,"lat":lat,"lng":lng,"date": dateParser(row["Time"]), "value": row["Value"]});
-			
-				counter++;
-
-				if(counter==psv.parse(data).length){
-					renderFilter();
-					renderMap()
-				}
-
+			if(counterCou==world.features.length){
+				setData();
+			}	
 		});
+
+
+		function setData(){
+			
+			worldData=world;
+			
+		var counter=0; 
+			psv.parse(data).forEach( function(row){
+					var lat,lng,Cou,disp;
+					country.forEach(function(k){
+						if(row["ISO"]==k.ISO3){
+							lat=k.lat;lng=k.lng;Cou=k.Country;
+						}
+					})
+					if(row["ISO"]!="OTO" || row["ISO"]!="OXE" || row["ISO"]!="ONM" ||row["ISO"]!="A5M")
+						long_data.push({"ISO": row["ISO"], "Country": Cou,"lat":lat,"lng":lng,"date": dateParser(row["Time"]), "value": row["Value"]});
+				
+					counter++;
+
+					if(counter==psv.parse(data).length){
+						
+						renderFilter();
+						renderMap()
+					}
+
+			});
+
+		}
 
 	};	  
     
@@ -257,6 +279,7 @@
 }
  
 	function renderMap(){
+
 		worldMap
 	    	.attr("id","world")
 	    	.selectAll("path")
@@ -269,13 +292,18 @@
 				return k.id;
 			})
 			.attr('fill', function(d){
-				var value= "#c0c7c9";
-				return value;
+				if(d.properties.display=="Yes")
+				 	return "#acb3b4";
+				else
+					return "#c6ccce";
+					
 			})
 			.attr("stroke-width","1px")
 			.attr('stroke', function(d){
-				var value= "#c0c7c9";
-				return value;
+				if(d.properties.display=="Yes")
+				 	return "#acb3b4";
+				else
+					return "#c6ccce";
 			})
 			.attr("d", path)
 			
@@ -353,13 +381,18 @@
 			})
 			
 			.style('stroke', function(d){
-					var basecolor = "#c0c7c9";
+					var basecolor;
+					
+					if(d.properties.display=="Yes")
+						basecolor= "#acb3b4";
+					else
+						basecolor=  "#c6ccce"; 
+
 					long_data.forEach(function(k){
+
 						if(k.ISO== d.id && formatDate((k.date))==formatDate(value)){
 							if(d.value!="")
 								basecolor =colorScale(parseFloat(k.value))
-							if(d.value=="") 
-								basecolor ="#868b8c";
 							
 						}
 					})
@@ -367,13 +400,17 @@
 				})
 			.attr('fill', function (d) {
 				
-				var basecolor = "#c0c7c9";
+				var basecolor;
+				
+				if(d.properties.display=="Yes")
+				 	basecolor= "#acb3b4";
+				else
+					basecolor=  "#c6ccce"; 
+
 				long_data.forEach(function(k){
 						if(k.ISO== d.id && formatDate((k.date))==formatDate(value)){
 							if(d.value!="")
 								basecolor =colorScale(parseFloat(k.value))
-							if(d.value=="") 
-								basecolor ="#868b8c";
 						}
 					})
 				return basecolor;

@@ -1,0 +1,45 @@
+Country	ctry_format	specs	display	
+AUS	Australia	OECD	Yes	
+AUT	Austria	OECD	Yes	
+BEL	Belgium	OECD	Yes	
+BRA	Brazil	BRIICS	Yes	
+CAN	Canada	OECD	Yes	
+CHE	Switzerland	OECD	Yes	
+CHL	Chile	OECD	Yes	
+CHN	China	BRIICS	Yes	
+COL	Colombia	OECD	Yes	
+CZE	Czech Republic	OECD	Yes	
+DEU	Germany	OECD	Yes	
+DNK	Denmark	OECD	Yes	
+ESP	Spain	OECD	Yes	
+EST	Estonia	OECD	Yes	
+FIN	Finland	OECD	Yes	
+FRA	France	OECD	Yes	
+GBR	United Kingdom	OECD	Yes	
+GRC	Greece	OECD	Yes	
+HUN	Hungary	OECD	Yes	
+IDN	Indonesia	BRIICS	Yes	
+IND	India	BRIICS	Yes	
+IRL	Ireland	OECD	Yes	
+ISL	Iceland	NA	No	
+ISR	Israel	OECD	Yes	
+ITA	Italy	OECD	Yes	
+JPN	Japan	OECD	Yes	
+KOR	Korea	OECD	Yes	
+LTU	Lithuania	OECD	Yes	
+LUX	Luxembourg	OECD	Yes	
+LVA	Latvia	OECD	Yes	
+MEX	Mexico	OECD	Yes	
+NLD	Netherlands	OECD	Yes	
+NOR	Norway	NA	No	
+NZL	New Zealand	OECD	Yes	
+POL	Poland	OECD	Yes	
+PRT	Portugal	OECD	Yes	
+RUS	Russian Federation	BRIICS	Yes	
+SVK	Slovak Republic	OECD	Yes	
+SVN	Slovenia	OECD	Yes	
+SWE	Sweden	OECD	Yes	
+TUR	Turkey	OECD	Yes	
+USA	United States	OECD	Yes	
+ZAF	South Africa	BRIICS	Yes	
+CRI	Costa Rica	non-OECD	Yes	
