@@ -27,7 +27,7 @@
 
 <body>
 
-	<h1>OECD Consumer Barometer</h1>
+	<h1><a href="http://www.oecd.org/sdd/leading-indicators/OECD-Consumer-Barometer.htm">OECD Consumer Barometer</a></h1>
 	<!--<div id="introPara">Monthly growth rate of normalised consumer confidence for OECD countries & BRIICS. The indicators have been computed by normalising the consumer indicators (net balances, seasonally adjusted) to their mean and standard deviation. More detail on the methodology can be found <a href="" target="_blank">here</a>.</div>-->
 	<div id="slider">
 		  <button id="play-button">Play</button>
@@ -36,7 +36,7 @@
 	<div id="legend"></div>
 	<div id="aboutMap">
 	</div>
-	<div id="source">Source: OECD MEI</div>
+	<div id="source">Source:  <a href="http://stats.oecd.org/wbos/default.aspx?datasetcode=CS_BAROMETER">OECD Consumer Barometer</a></div>
 
 	<!--<div id="source"><b>Source</b>: <a href="https://dx.doi.org/10.1787/67ede41b-en" target="_blank">OECD Pensions Outlook 2020</a></div>-->
 
@@ -53,6 +53,8 @@
 
 	var worldData, alldata;
 	var long_data = []; 
+
+	var startDate,endDate,lowest,hightest;
 
 	var urls = {
 	    world: "data/world.json",
@@ -197,13 +199,17 @@
 	};	  
     
 	function renderFilter(){
-		var startDate = d3.min(long_data,function(d){return (d.date)});
-		var endDate = d3.max(long_data,function(d){return (d.date)});
+		startDate = d3.min(long_data,function(d){return (d.date)});
+		endDate = d3.max(long_data,function(d){return (d.date)});
 
-		var lowest = d3.min(long_data,function(d){return parseFloat(d.value)});
-		var highest = d3.max(long_data,function(d){return parseFloat(d.value)});
-		
-		colorScale.domain([lowest, highest]);		
+		lowest = d3.min(long_data,function(d){return parseFloat(d.value)});
+		highest = d3.max(long_data,function(d){return parseFloat(d.value)});
+	
+		var max;
+		if(Math.abs(lowest)>=Math.abs(highest))
+			colorScale.domain([-Math.abs(lowest), Math.abs(lowest)])
+		else
+			colorScale.domain([-Math.abs(highest), Math.abs(highest)])	;		
 
 		//// DRAW LEGEND
 
@@ -326,7 +332,7 @@
 					d3.select("#" + d.data.ISO).style("stroke","#171717")
 					d3.select("#" + d.data.ISO).style("stroke-width","2px")
 					divMap.transition()
-						.duration(250)
+						.duration(0)
 						.style("opacity", 1);
 					
 					var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+formatDate(d.data.date)+"</i><br/>Normalised consumer confidence indicator: <b>"+d.data.value+"</b>";
@@ -372,7 +378,7 @@
 		worldMap
 			.selectAll("path")
 			.data(worldData.features)
-			.transition().duration(200)
+			.transition().duration(250)
 			.attr("class", function (k) {
 				return "world ";
 			})
@@ -436,7 +442,7 @@
 					d3.select("#" + d.data.ISO).style("stroke","#171717")
 					d3.select("#" + d.data.ISO).style("stroke-width","2px")
 						divMap.transition()
-							.duration(250)
+							.duration(100)
 							.style("opacity", 1);
 						
 						var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+formatDate(d.data.date)+"</i><br/>Normalised consumer confidence indicator: <b>"+d.data.value+"</b>";
@@ -519,25 +525,25 @@ function resize() {
 
 playButton
     .on("click", function() {
-    var button = d3.select(this);
-    if (button.text() == "Pause") {
-      moving = false;
-      clearInterval(timer);
-      // timer = 0;
-      button.text("Play");
-    } else {
-      moving = true;
-      timer = setInterval(step, 0.01);
-      button.text("Pause");
-    }
-	
+		var button = d3.select(this);
+		if (button.text() == "Pause") {
+		moving = false;
+		clearInterval(timer);
+		// timer = 0;
+		button.text("Play");
+		} else {
+		moving = true;
+		timer = setInterval(step, 100);
+		button.text("Pause");
+		}
   })
 
   
 function step() {
   updateMap(x.invert(currentValue));
-  currentValue = currentValue + (1);
+  currentValue = currentValue + (15);
   if (currentValue > targetValue) {
+	  updateMap(endDate)
     moving = false;
     currentValue = 0;
     clearInterval(timer);
