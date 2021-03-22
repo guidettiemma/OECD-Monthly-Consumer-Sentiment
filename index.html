@@ -335,7 +335,7 @@
 						.duration(0)
 						.style("opacity", 1);
 					
-					var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+formatDate(d.data.date)+"</i><br/>Normalised consumer confidence indicator: <b>"+d.data.value+"</b>";
+					var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+formatDate(d.data.date)+"</i><br/>consumer Barometer: <b>"+d.data.value+"</b>";
 					divMap.html(htmlText)
 						.style("left", event.pageX - document.body.scrollLeft + "px")
 						.style("top", event.pageY  + "px");
@@ -445,7 +445,7 @@
 							.duration(100)
 							.style("opacity", 1);
 						
-						var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+formatDate(d.data.date)+"</i><br/>Normalised consumer confidence indicator: <b>"+d.data.value+"</b>";
+						var htmlText = "<b>" + d.data.Country + "</b><br/><i>"+formatDate(d.data.date)+"</i><br/>consumer Barometer: <b>"+d.data.value+"</b>";
 					divMap.html(htmlText)
 							.style("left", event.pageX - document.body.scrollLeft + "px")
 							.style("top", event.pageY /*- document.body.scrollTop*/ + "px");
