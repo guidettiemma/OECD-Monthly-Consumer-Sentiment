@@ -181,13 +181,12 @@
 							lat=k.lat;lng=k.lng;Cou=k.Country;
 						}
 					})
-					if(row["ISO"]!="OTO" || row["ISO"]!="OXE" || row["ISO"]!="ONM" ||row["ISO"]!="A5M")
+					if(row["ISO"]!="OTO" && row["ISO"]!="OXE" && row["ISO"]!="ONM" && row["ISO"]!="A5M" && row["ISO"]!="G7M" && row["ISO"]!="OEU")
 						long_data.push({"ISO": row["ISO"], "Country": Cou,"lat":lat,"lng":lng,"date": dateParser(row["Time"]), "value": row["Value"]});
 				
 					counter++;
 
 					if(counter==psv.parse(data).length){
-						
 						renderFilter();
 						renderMap()
 					}
@@ -234,7 +233,7 @@
 		 targetValue = width-4*margin;
 
 		 playButton = d3.select("#play-button");
-			
+		 
 		x = d3.scaleTime()
 			.domain([startDate, endDate])
 			.range([margin, targetValue])
@@ -314,7 +313,7 @@
 			.attr("d", path)
 			
 			
-		var startDate = d3.min(long_data,function(d){return (d.date)});
+		//var startDate = d3.min(long_data,function(d){return (d.date)});
 
 		polygonData=long_data
 		polygons = voronoi(polygonData.filter(function(k){ return formatDate((k.date))==formatDate(startDate)})).polygons();
@@ -362,12 +361,13 @@
 					.duration(100)
 					.style("opacity", 0);
 			})
-			updateMap(startDate)
+
+		updateMap(startDate)
 
 	}
 
 	function updateMap(value){
-
+console.log(value)
 		// update position and text of label according to slider scale
 		handle.attr("cx", x(value));
 		label
