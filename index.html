@@ -45,11 +45,11 @@
 <script type="text/javascript">
 
 
-        function dateParser(d){
-            var splitted = d.split('M');
-            
-            return d3.timeParse('%m-%Y')(splitted[1] + '-' + splitted[0]);
-        }
+	function dateParser(d){
+		var splitted = d.split('M');
+		
+		return d3.timeParse('%m-%Y')(splitted[1] + '-' + splitted[0]);
+	}
 
 	var worldData, alldata;
 	var long_data = []; 
@@ -233,8 +233,8 @@
 		 targetValue = width-4*margin;
 
 		 playButton = d3.select("#play-button");
-		 
-		x = d3.scaleTime()
+
+		 x = d3.scaleTime()
 			.domain([startDate, endDate])
 			.range([margin, targetValue])
 			.clamp(true);
@@ -317,6 +317,7 @@
 
 		polygonData=long_data
 		polygons = voronoi(polygonData.filter(function(k){ return formatDate((k.date))==formatDate(startDate)})).polygons();
+
 		voronoiLayer.selectAll(".cell")
 			.data(polygons)
 			.enter()

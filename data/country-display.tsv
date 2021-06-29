@@ -8,6 +8,7 @@ CHE	Switzerland	OECD	Yes
 CHL	Chile	OECD	Yes	
 CHN	China	BRIICS	Yes	
 COL	Colombia	OECD	Yes	
+CRI	Costa Rica	OECD	Yes	
 CZE	Czech Republic	OECD	Yes	
 DEU	Germany	OECD	Yes	
 DNK	Denmark	OECD	Yes	
@@ -42,4 +43,3 @@ SWE	Sweden	OECD	Yes
 TUR	Turkey	OECD	Yes	
 USA	United States	OECD	Yes	
 ZAF	South Africa	BRIICS	Yes	
-CRI	Costa Rica	non-OECD	Yes	
