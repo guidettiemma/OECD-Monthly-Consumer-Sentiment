@@ -5,7 +5,14 @@ body{
   background:#ffffff;
 }
 
+a {
+color: #101D40;
+text-decoration: none;
+}
 
+.label{
+      font-size: 16px;
+}
 
 text.statelabel {
     font-size: 0.8rem;
