@@ -10,10 +10,6 @@ color: #101D40;
 text-decoration: none;
 }
 
-.label{
-      font-size: 16px;
-}
-
 text.statelabel {
     font-size: 0.8rem;
     text-anchor:middle;
@@ -78,6 +74,10 @@ text.statelabel {
       stroke-opacity: 0.5;
       stroke-width: 1.25px;
     }
+
+.label{
+      font-size: 16px;
+}
 
 
 /** 
