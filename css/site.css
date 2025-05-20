@@ -149,7 +149,7 @@ h1{
 #introPara{
 
   font-family: "Noto Sans Display",sans-serif;
-  font-size: 1.2em;
+  font-size: 2.2em;
   font-weight: 300;
   color: #212529;
   max-width:990px;
@@ -163,7 +163,7 @@ h1{
 #introIndex{
 
   font-family: "Noto Sans Display",sans-serif;
-  font-size: 1em;
+  font-size: 2em;
   font-weight: 100;
   color: #212529;
   max-width:990px;
@@ -308,7 +308,7 @@ div.tooltipStatic {
 }
 
 .caption{
-  font : 12px Arial; color:#575757;
+  font : 12px Noto Sans; color:#575757;
 }
 .background {
   fill: #deeaf1;
@@ -362,8 +362,8 @@ div.tooltipStatic {
 .couNav{
   font-family: 'Noto Sans', sans-serif;
   font-weight: 100;
-  font-size: 1.25rem;
-  color: #04629a;
+  font-size: 16px;
+  color: #101D40;
   text-decoration: underline;
   cursor: pointer;
 }
