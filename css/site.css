@@ -38,7 +38,7 @@ text.statelabel {
     }    
     
     .ticks {
-      font-size: 10px;
+      font-size: 16px;
     }
 
     .track,
@@ -113,7 +113,7 @@ text.statelabel {
 }
 
 #bannertext{
-      font-family: 'Oswald', sans-serif;
+      font-family: 'Noto Sans', sans-serif;
       font-size: 2vw;
       font-weight: 700;
       color: #ffffff;
@@ -223,7 +223,7 @@ div.tooltip {
     max-width: 40%;
     margin-top: -1.25em;
     padding: 0.75em 1em;
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
     /*white-space: nowrap;*/
     font-size: 20px;
     font-size: 1.33rem;
@@ -266,7 +266,7 @@ div.tooltipStatic {
     max-width: 40%;
     margin-top: -1.25em;
     padding: 0.75em 1em;
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
     /*white-space: nowrap;*/
    
     font-size: 1.75rem;
@@ -537,7 +537,7 @@ width:87.5%;
 #morebtn{
     text-align: right;
     vertical-align: sub;
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
     font-style: normal;
     font-size: 2rem;
     font-weight:600;
@@ -555,7 +555,7 @@ width:87.5%;
 
 #navigHeader{
     margin-left:10%;
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
     font-style: normal;
     font-size: 1.5rem;
     font-weight:600;
@@ -589,7 +589,7 @@ width:87.5%;
     -o-transition: all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
     transition: all 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
     color: #0b1e2d;
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Noto Sans', sans-serif;
     font-style: normal;
     font-size: 1.0rem;
     font-weight:300;
@@ -611,7 +611,7 @@ width:87.5%;
   cursor: pointer;
 }
 .legendtext{
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Noto Sans', sans-serif;
     font-style: normal;
     font-size: 1.0rem;
     font-weight:600;
@@ -662,7 +662,7 @@ text-decoration: underline;
 #countrySel{
     padding-top: 10px;
     margin-left: 1.2em;
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
     font-size: 2.5rem;
     font-weight: 700;
     line-height: 1.2;
@@ -673,7 +673,7 @@ text-decoration: underline;
 
     margin-left: 2.0em;
     margin-bottom:10px;
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
     font-style: normal;
     font-size: 1.5rem;
     font-weight: 300;
@@ -935,7 +935,7 @@ text-decoration: underline;
       -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
       box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
       /*pointer-events: none;*/  
-      font-family: 'Oswald', sans-serif;
+      font-family: 'Noto Sans', sans-serif;
       font-size: 1.75rem;
       font-weight: 700;
       color: #04629a;
@@ -949,7 +949,7 @@ text-decoration: underline;
 
 #intromodedemploi{
     margin-left: 1.2em;
-      font-family: 'Oswald', sans-serif;
+      font-family: 'Noto Sans', sans-serif;
       font-size: 1.75rem;
       font-weight: 700;
       color: #04629a;
@@ -1011,7 +1011,7 @@ text-decoration: underline;
 
 #updateTime{
     margin-left: 2.0em;
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
     font-size: 1.5rem;
     font-weight: 100;
     font-style: italic;
@@ -1024,7 +1024,7 @@ text-decoration: underline;
     display:block;
     margin-left: 2.0em;
     margin-top: 0.5em;
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Noto Sans', sans-serif;
     font-size: 1.5rem;
     font-weight: 700;
     font-style: normal;
